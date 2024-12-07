@@ -1,29 +1,74 @@
 // Actions used in a good maaner. Proper error handling. Code clarity is very good.
 
-export const makePhoneCall = (item) => (dispatch) => {
+import {
+  collection,
+  doc,
+  setDoc,
+  onSnapshot,
+  deleteDoc,
+} from "firebase/firestore";
+import { db } from "../../config/firebase.js";
+
+export const fetchData = () => (dispatch) => {
+  dispatch({ type: "FETCH_CALL_LOGS_PENDING" });
+
   try {
-    dispatch({
-      type: "START_PHONE_CALL",
-      payload: item,
+    const callLogsRef = collection(db, "callLogs");
+
+    const unsubscribe = onSnapshot(callLogsRef, (snapshot) => {
+      const logs = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      dispatch({
+        type: "FETCH_CALL_LOGS_SUCCESS",
+        payload: logs,
+      });
     });
-  } catch (err) {
-    console.error(
-      "Error starting phone call:",
-      err.message || "Unknown error occurred"
-    );
+
+    return unsubscribe;
+  } catch (error) {
+    dispatch({
+      type: "FETCH_CALL_LOGS_ERROR",
+      error: error.message || "An error occurred while fetching call logs",
+    });
   }
 };
 
-export const handleDelCall = (value) => (dispatch) => {
+export const handlePhoneCall = (item, onSuccess) => async (dispatch) => {
   try {
+    const docRef = doc(collection(db, "callLogs"));
+    const docId = docRef?.id;
+    const payload = {
+      createdAt: new Date(),
+      number: item,
+      id: docId,
+    };
+    await setDoc(docRef, payload);
+
     dispatch({
-      type: "REMOVE_CALL_LOG",
-      payload: value,
+      type: "START_PHONE_CALL",
+      payload,
+    });
+    onSuccess();
+  } catch (err) {
+    console.error(err.message || "An error occured while making the call");
+  }
+};
+
+export const handleDelCall = (id) => async (dispatch) => {
+  try {
+    const docRef = doc(db, "callLogs", id);
+    await deleteDoc(docRef);
+
+    dispatch({
+      type: "REMOVE_CALL_LOG_SUCCESS",
+      payload: id,
     });
   } catch (err) {
     console.error(
-      "Error deleting call log:",
-      err.message || "Unknown error occurred"
+      err.message || "An error occurred while deleting the call log"
     );
   }
 };

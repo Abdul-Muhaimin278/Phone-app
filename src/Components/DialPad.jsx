@@ -2,9 +2,10 @@ import { useState } from "react";
 import { IoIosCall } from "react-icons/io";
 import removeBtn from "../assets/icons/delete-icon.svg";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { makePhoneCall } from "../store/actions/phoneCallActions";
+import { useDispatch, useSelector } from "react-redux";
+import { handlePhoneCall } from "../store/actions/phoneCallActions";
 import { Layout } from "../layout";
+import { Spinner } from "reactstrap";
 
 // Code clarity is quite good. Made proper functions and managed functionality in a good manner.
 
@@ -12,6 +13,7 @@ const DialPad = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [currentNumber, setCurrentNumber] = useState("");
+  const [calling, setCalling] = useState(false);
 
   const dialPadValues = [
     { no: "1", chars: "" },
@@ -40,32 +42,13 @@ const DialPad = () => {
     setCurrentNumber(currentNumber.slice(0, -1));
   };
 
-  const formatTime = () => {
-    const now = new Date();
-    let hours = now.getHours();
-    const minutes = now.getMinutes();
-    const ampm = hours >= 12 ? "PM" : "AM";
-    hours = hours % 12;
-    hours = hours ? hours : 12;
-    return `${hours}:${minutes < 10 ? "0" + minutes : minutes} ${ampm}`;
-  };
+  const handleCallBtn = async () => {
+    if (!currentNumber) return;
 
-  const generateUniqueId = () => {
-    return `${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-  };
-
-  const handleCallBtn = () => {
-    if (currentNumber) {
-      const uniqueId = generateUniqueId();
-      dispatch(
-        makePhoneCall({
-          id: uniqueId,
-          time: formatTime(),
-          number: currentNumber,
-        })
-      );
-      navigate("/call");
-    }
+    setCalling(true);
+    dispatch(handlePhoneCall(currentNumber, () => navigate("/call"))).then(() =>
+      setCalling(false)
+    );
   };
 
   return (
@@ -91,13 +74,16 @@ const DialPad = () => {
               <p className="m-0">{item?.chars}</p>
             </button>
           ))}
-          <div className="text-center"></div>
           <button
-            className="rounded-circle dialpad-call"
+            className=" rounded-circle dialpad-call"
             onClick={handleCallBtn}
             disabled={!currentNumber}
           >
-            <IoIosCall color="white" />
+            {calling ? (
+              <Spinner color="light" className="fw-light" />
+            ) : (
+              <IoIosCall color="white" />
+            )}
           </button>
           <button
             className="d-flex justify-content-center align-items-center"
