@@ -2,7 +2,7 @@ import { useState } from "react";
 import { IoIosCall } from "react-icons/io";
 import removeBtn from "../assets/icons/delete-icon.svg";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { handlePhoneCall } from "../store/actions/phoneCallActions";
 import { Layout } from "../layout";
 import { Spinner } from "reactstrap";
@@ -64,7 +64,7 @@ const DialPad = () => {
           <p className="text-primary my-1 cursor-pointer">Add Number</p>
         </div>
         <div className="d-grid align-items-center justify-content-center mb-2 dialpad-grid">
-          {dialPadValues.map((item) => (
+          {dialPadValues?.map((item) => (
             <button
               key={item?.no}
               className="d-flex flex-column justify-content-center align-items-center rounded-circle text-white dialpad-button"
