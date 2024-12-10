@@ -26,17 +26,17 @@ const CallScreen = () => {
 
   const [isPulsing, setIsPulsing] = useState(false);
 
-  const saveCallAndNavigate = async () => {
+  const handleCallEnd = () => {
     setIsPulsing(true);
-    await dispatch(
+    saveCallAndNavigate();
+  };
+
+  const saveCallAndNavigate = async () => {
+    dispatch(
       handleSavePhoneCall(number, () => {
         setTimeout(() => navigate("/recent"), 500);
       })
     ).then(() => setIsPulsing(false));
-  };
-
-  const handleCallEnd = () => {
-    saveCallAndNavigate();
   };
 
   useEffect(() => {
