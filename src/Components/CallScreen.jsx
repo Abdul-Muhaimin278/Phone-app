@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { handleSavePhoneCall } from "../store/actions/phoneCallActions";
 import { BsCameraVideoFill, BsFillMicMuteFill } from "react-icons/bs";
@@ -10,38 +10,32 @@ import { MdCallEnd } from "react-icons/md";
 import { RxInfoCircled } from "react-icons/rx";
 
 const actionButtons = [
-  { icon: <HiSpeakerWave />, label: "Speaker" },
-  { icon: <BsCameraVideoFill />, label: "FaceTime" },
-  { icon: <BsFillMicMuteFill />, label: "Mute" },
-  { icon: <IoPersonAddSharp />, label: "Add" },
-  { icon: <MdCallEnd />, label: "End", className: "end-call" },
-  { icon: <IoIosKeypad />, label: "Keypad" },
+  { icon: HiSpeakerWave, label: "Speaker" },
+  { icon: BsCameraVideoFill, label: "FaceTime" },
+  { icon: BsFillMicMuteFill, label: "Mute" },
+  { icon: IoPersonAddSharp, label: "Add" },
+  { icon: MdCallEnd, label: "End", className: "end-call" },
+  { icon: IoIosKeypad, label: "Keypad" },
 ];
 
 const CallScreen = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { pulsing } = useSelector((state) => state?.call);
   const location = useLocation();
   const number = location.state?.number;
 
-  const [isPulsing, setIsPulsing] = useState(false);
-
-  const handleCallEnd = () => {
-    setIsPulsing(true);
-    saveCallAndNavigate();
+  const handleCallEnd = (label) => {
+    if (label === "End") handleSaveAndNavigate();
   };
 
-  const saveCallAndNavigate = async () => {
-    dispatch(
-      handleSavePhoneCall(number, () => {
-        setTimeout(() => navigate("/recent"), 500);
-      })
-    ).then(() => setIsPulsing(false));
+  const handleSaveAndNavigate = () => {
+    dispatch(handleSavePhoneCall(number, () => navigate("/recent")));
   };
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      saveCallAndNavigate();
+      handleSaveAndNavigate();
     }, 10000);
 
     return () => clearTimeout(timeout);
@@ -54,27 +48,30 @@ const CallScreen = () => {
           <RxInfoCircled />
         </div>
         <div className="status">calling mobile...</div>
+
         <h1 className="contact-name mx-auto text-center text-white">
           {number}
         </h1>
       </div>
       <div className="d-flex justify-content-between align-items-center callwindow-button">
         <div className="d-grid align-items-center justify-content-center w-100 action-grid">
-          {actionButtons?.map(({ icon, className, label }, index) => {
-            const handleClick = label === "End" ? handleCallEnd : () => {};
-
+          {actionButtons?.map((item, index) => {
             return (
               <div key={index}>
                 <button
                   className={`d-grid align-items-center justify-content-center text-white action-button ${
-                    className || ""
-                  } ${label === "End" && isPulsing ? "pulse-animation" : ""}`}
-                  onClick={handleClick}
-                  disabled={isPulsing}
+                    item?.className || ""
+                  }`}
+                  onClick={() => handleCallEnd(item?.label)}
+                  disabled={pulsing}
                 >
-                  <span className="button-icons mb-2">{icon}</span>
+                  <item.icon
+                    className={`button-icons ${
+                      item?.label === "End" && pulsing ? "pulse-animation" : ""
+                    }`}
+                  />
                 </button>
-                <p className="text-white text-center m-0">{label}</p>
+                <p className="text-white text-center m-0">{item?.label}</p>
               </div>
             );
           })}

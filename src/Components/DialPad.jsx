@@ -48,7 +48,7 @@ const DialPad = () => {
         <div className="d-flex flex-column align-items-center justify-content-between my-auto dialpad-number">
           <input
             type="text"
-            readOnly
+            readOnly={!currentNumber}
             value={currentNumber}
             className="bg-transparent border-0 text-center fs-1 text-white number-preview"
           />

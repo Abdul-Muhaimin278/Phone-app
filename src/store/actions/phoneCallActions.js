@@ -40,6 +40,9 @@ export const fetchData = () => (dispatch) => {
 };
 
 export const handleSavePhoneCall = (item, onSuccess) => async (dispatch) => {
+  dispatch({
+    type: "FIREBASE_SAVE_PENDING",
+  });
   try {
     const docRef = doc(collection(db, "callLogs"));
     const docId = docRef?.id;
@@ -51,12 +54,15 @@ export const handleSavePhoneCall = (item, onSuccess) => async (dispatch) => {
     await setDoc(docRef, payload);
 
     dispatch({
-      type: "START_PHONE_CALL",
+      type: "FIREBASE_SAVE_SUCCESS",
       payload,
     });
     onSuccess();
   } catch (err) {
     console.error(err.message || "An error occured while making the call");
+    dispatch({
+      type: "FIREBASE_SAVE_ERROR",
+    });
   }
 };
 

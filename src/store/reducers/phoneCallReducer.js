@@ -1,6 +1,7 @@
 const initialState = {
   callData: [],
   loading: false,
+  pulsing: false,
 };
 
 // Properly handled state
@@ -17,8 +18,18 @@ export const handleCallAppData = (state = initialState, action) => {
     case "FETCH_CALL_LOGS_ERROR":
       return { ...state, loading: false };
 
-    case "START_PHONE_CALL":
-      return { ...state, callData: [action?.payload, ...state.callData] };
+    case "FIREBASE_SAVE_PENDING":
+      return { ...state, pulsing: true };
+
+    case "FIREBASE_SAVE_SUCCESS":
+      return {
+        ...state,
+        callData: [action?.payload, ...state.callData],
+        pulsing: false,
+      };
+
+    case "FIREBASE_SAVE_ERROR":
+      return { ...state, pulsing: false };
 
     case "REMOVE_CALL_LOG_SUCCESS":
       return {
