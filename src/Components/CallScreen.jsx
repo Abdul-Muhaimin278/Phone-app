@@ -1,14 +1,13 @@
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
+import { handleSavePhoneCall } from "../store/actions/phoneCallActions";
 import { BsCameraVideoFill, BsFillMicMuteFill } from "react-icons/bs";
 import { HiSpeakerWave } from "react-icons/hi2";
 import { IoIosKeypad } from "react-icons/io";
 import { IoPersonAddSharp } from "react-icons/io5";
 import { MdCallEnd } from "react-icons/md";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { RxInfoCircled } from "react-icons/rx";
-import { useEffect } from "react";
-
-// Managed functionality in a good manner. Code clarity and structure is also very good.
 
 const actionButtons = [
   { icon: <HiSpeakerWave />, label: "Speaker" },
@@ -21,19 +20,32 @@ const actionButtons = [
 
 const CallScreen = () => {
   const navigate = useNavigate();
-  const { callData } = useSelector((state) => state?.call);
+  const dispatch = useDispatch();
+  const location = useLocation();
+  const number = location.state?.number;
+
+  const [isPulsing, setIsPulsing] = useState(false);
+
+  const saveCallAndNavigate = async () => {
+    setIsPulsing(true);
+    await dispatch(
+      handleSavePhoneCall(number, () => {
+        setTimeout(() => navigate("/recent"), 500);
+      })
+    ).then(() => setIsPulsing(false));
+  };
 
   const handleCallEnd = () => {
-    navigate("/recent");
+    saveCallAndNavigate();
   };
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      navigate("/recent");
+      saveCallAndNavigate();
     }, 10000);
 
     return () => clearTimeout(timeout);
-  }, [navigate]);
+  }, []);
 
   return (
     <div className="d-flex flex-column justify-content-between align-items-center mx-auto callwindow">
@@ -43,7 +55,7 @@ const CallScreen = () => {
         </div>
         <div className="status">calling mobile...</div>
         <h1 className="contact-name mx-auto text-center text-white">
-          {callData[0]?.number}
+          {number}
         </h1>
       </div>
       <div className="d-flex justify-content-between align-items-center callwindow-button">
@@ -56,8 +68,9 @@ const CallScreen = () => {
                 <button
                   className={`d-grid align-items-center justify-content-center text-white action-button ${
                     className || ""
-                  }`}
+                  } ${label === "End" && isPulsing ? "pulse-animation" : ""}`}
                   onClick={handleClick}
+                  disabled={isPulsing}
                 >
                   <span className="button-icons mb-2">{icon}</span>
                 </button>

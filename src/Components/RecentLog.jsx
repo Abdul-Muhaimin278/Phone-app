@@ -11,15 +11,14 @@ import { Spinner } from "reactstrap";
 const RecentLog = () => {
   const dispatch = useDispatch();
   const { callData, loading } = useSelector((state) => state?.call);
-  // console.log(callData);
 
   const [activeFilter, setActiveFilter] = useState("All");
   const [deleting, setDeleting] = useState(null);
 
   const formateDate = (firestoreTimestamp) => {
     const jsDate = new Date(
-      firestoreTimestamp.seconds * 1000 +
-        firestoreTimestamp.nanoseconds / 1000000
+      firestoreTimestamp?.seconds * 1000 +
+        firestoreTimestamp?.nanoseconds / 1000000
     );
     const formattedDate = jsDate.toLocaleTimeString("en-GB", {
       hour: "2-digit",

@@ -2,18 +2,13 @@ import { useState } from "react";
 import { IoIosCall } from "react-icons/io";
 import removeBtn from "../assets/icons/delete-icon.svg";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { handlePhoneCall } from "../store/actions/phoneCallActions";
 import { Layout } from "../layout";
-import { Spinner } from "reactstrap";
 
 // Code clarity is quite good. Made proper functions and managed functionality in a good manner.
 
 const DialPad = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const [currentNumber, setCurrentNumber] = useState("");
-  const [calling, setCalling] = useState(false);
 
   const dialPadValues = [
     { no: "1", chars: "" },
@@ -39,16 +34,12 @@ const DialPad = () => {
   };
 
   const handleRemoveNumBtn = () => {
-    setCurrentNumber(currentNumber.slice(0, -1));
+    setCurrentNumber(currentNumber?.slice(0, -1));
   };
 
-  const handleCallBtn = async () => {
+  const handleCallBtn = () => {
     if (!currentNumber) return;
-
-    setCalling(true);
-    dispatch(handlePhoneCall(currentNumber, () => navigate("/call"))).then(() =>
-      setCalling(false)
-    );
+    navigate("/call", { state: { number: currentNumber } });
   };
 
   return (
@@ -79,11 +70,7 @@ const DialPad = () => {
             onClick={handleCallBtn}
             disabled={!currentNumber}
           >
-            {calling ? (
-              <Spinner color="light" className="fw-light" />
-            ) : (
-              <IoIosCall color="white" />
-            )}
+            <IoIosCall color="white" />
           </button>
           <button
             className="d-flex justify-content-center align-items-center"

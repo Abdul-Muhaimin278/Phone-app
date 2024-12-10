@@ -6,6 +6,8 @@ import {
   setDoc,
   onSnapshot,
   deleteDoc,
+  query,
+  orderBy,
 } from "firebase/firestore";
 import { db } from "../../config/firebase.js";
 
@@ -14,8 +16,9 @@ export const fetchData = () => (dispatch) => {
 
   try {
     const callLogsRef = collection(db, "callLogs");
+    const callLogsQuery = query(callLogsRef, orderBy("createdAt", "desc"));
 
-    const unsubscribe = onSnapshot(callLogsRef, (snapshot) => {
+    const unsubscribe = onSnapshot(callLogsQuery, (snapshot) => {
       const logs = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -36,7 +39,7 @@ export const fetchData = () => (dispatch) => {
   }
 };
 
-export const handlePhoneCall = (item, onSuccess) => async (dispatch) => {
+export const handleSavePhoneCall = (item, onSuccess) => async (dispatch) => {
   try {
     const docRef = doc(collection(db, "callLogs"));
     const docId = docRef?.id;
