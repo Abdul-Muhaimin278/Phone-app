@@ -55,7 +55,7 @@ const RecentLog = () => {
                 All
               </button>
               <button
-                className={`filter px-3 ${
+                className={`filter ${
                   activeFilter === "Missed" ? "active" : "non-active"
                 }`}
                 onClick={() => setActiveFilter("Missed")}
