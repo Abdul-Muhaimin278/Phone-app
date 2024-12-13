@@ -246,7 +246,13 @@ button {
   border-bottom: 1px solid #3333337c;
 }
 
+.spinner-container {
+  height: 40vh;
+}
+
 .recent-spinner {
+  height: 3rem !important;
+  width: 3rem !important;
   color: #f50809 !important;
 }
 

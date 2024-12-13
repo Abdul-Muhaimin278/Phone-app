@@ -2,27 +2,25 @@ import { useEffect, useState } from "react";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchData, handleDelCall } from "../store/actions/phoneCallActions";
-import { Spinner } from "reactstrap";
-
-// Implement All | Missed tabs functionality. No need for that.
-// Otherwise code clarity is very good.
+import { Button, Input, Spinner } from "reactstrap";
 
 const RecentLog = () => {
   const dispatch = useDispatch();
-  const { callData, loading } = useSelector((state) => state?.call);
+  const { callData, loading, hasMoreLogs, lastLog, loadingMore } = useSelector(
+    (state) => state?.call
+  );
 
-  const [activeFilter, setActiveFilter] = useState("All");
   const [deleting, setDeleting] = useState(null);
+  const [activeFilter, setActiveFilter] = useState("All");
+  const [orderFilter, setOrderFilter] = useState("desc");
 
-  const formateDate = (firestoreTimestamp) => {
-    const jsDate = new Date(
-      firestoreTimestamp?.seconds * 1000 +
-        firestoreTimestamp?.nanoseconds / 1000000
-    );
-    const formattedDate = jsDate.toLocaleTimeString("en-GB", {
+  const formateDate = (time) => {
+    const jsDate = new Date(time?.seconds * 1000 + time?.nanoseconds / 1000000);
+    const formattedDate = jsDate.toLocaleTimeString("en-PK", {
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
+      timeZone: "Asia/Karachi",
     });
     return formattedDate;
   };
@@ -32,18 +30,26 @@ const RecentLog = () => {
     dispatch(handleDelCall(callId));
   };
 
-  useEffect(() => {
-    const unsubscribe = dispatch(fetchData());
+  const handleSortBy = (order) => {
+    setOrderFilter(order);
+    dispatch(fetchData(order, null));
+  };
 
+  const handleLoadMore = () => {
+    dispatch(fetchData(orderFilter, lastLog));
+  };
+
+  useEffect(() => {
+    const unsubscribe = dispatch(fetchData("desc", null));
     return () => unsubscribe();
   }, [dispatch]);
 
   return (
-    <section className="d-flex flex-column bg-black overflow-y-auto  text-white recents">
+    <section className="d-flex flex-column justify-content-between bg-black overflow-y-auto text-white recents">
       <div className="mx-auto w-100 recents-container">
-        <div className="d-flex align-items-center header">
+        <div className="d-flex align-items-center justify-content-between header">
           <span className="text-primary cursor-pointer edit-btn">Edit</span>
-          <div className="d-flex mx-auto text-white filter-buttons">
+          <div className="text-white filter-buttons">
             <button
               className={`filter px-4 ${
                 activeFilter === "All" ? "active" : "non-active"
@@ -61,13 +67,26 @@ const RecentLog = () => {
               Missed
             </button>
           </div>
+          <div>
+            <Input
+              bsSize="sm"
+              type="select"
+              className="text-bg-dark border-0"
+              onChange={(e) => handleSortBy(e.target.value)}
+            >
+              <option disabled>Sort by</option>
+              <option value="desc">Latest</option>
+              <option value="asc">Oldest</option>
+            </Input>
+          </div>
         </div>
+
         <div className="title px-3">
           <h2 className="text-white my-3">Recents</h2>
         </div>
 
         {loading ? (
-          <div className="d-flex justify-content-center align-items-center w-100 my-5">
+          <div className="d-flex justify-content-center align-items-center w-100 spinner-container">
             <Spinner className="recent-spinner" />
           </div>
         ) : (
@@ -85,7 +104,7 @@ const RecentLog = () => {
                     {formateDate(log?.createdAt)}
                   </span>
                   <button
-                    className=" delete-button cursor-pointer"
+                    className="delete-button cursor-pointer"
                     onClick={() => handleDeleteCallLog(log?.id)}
                   >
                     {deleting === log?.id ? (
@@ -100,6 +119,17 @@ const RecentLog = () => {
           ))
         )}
       </div>
+
+      {hasMoreLogs && (
+        <Button
+          color="danger"
+          className="mx-auto"
+          onClick={handleLoadMore}
+          disabled={loadingMore}
+        >
+          {loadingMore ? <Spinner size="sm" /> : "Load More"}
+        </Button>
+      )}
     </section>
   );
 };

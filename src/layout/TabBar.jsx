@@ -19,21 +19,19 @@ const TabBar = () => {
   ];
 
   const handleTabBtns = (path) => {
-    if (path === "/recent" || path === "/dial") {
-      navigate(path);
-    }
+    navigate(path);
   };
 
   return (
     <section className="d-flex justify-content-center align-items-center bg-black text-white w-100 tabbar-container pb-1">
       <Row className="d-flex justify-content-between align-items-center text-center w-100 tabbar-row">
-        {navItems.map((item, index) => {
-          const isActive = location.pathname === item.path;
+        {navItems?.map((item, index) => {
+          const isActive = location.pathname === item?.path;
 
           return (
             <Col key={index} className="px-0">
               <button
-                onClick={() => item.path && handleTabBtns(item?.path)}
+                onClick={() => item?.path && handleTabBtns(item?.path)}
                 disabled={!item?.path}
               >
                 <div className="tabbar-icon">

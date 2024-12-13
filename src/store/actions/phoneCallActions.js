@@ -8,15 +8,30 @@ import {
   deleteDoc,
   query,
   orderBy,
+  limit,
+  startAfter,
 } from "firebase/firestore";
 import { db } from "../../config/firebase.js";
 
-export const fetchData = () => (dispatch) => {
-  dispatch({ type: "FETCH_CALL_LOGS_PENDING" });
+export const fetchData = (order, lastLog) => (dispatch) => {
+  if (lastLog) {
+    dispatch({ type: "LOAD_MORE_PENDING" });
+  } else {
+    dispatch({ type: "FETCH_CALL_LOGS_PENDING" });
+  }
 
   try {
     const callLogsRef = collection(db, "callLogs");
-    const callLogsQuery = query(callLogsRef, orderBy("createdAt", "desc"));
+    const lim = 2;
+    let callLogsQuery = query(
+      callLogsRef,
+      orderBy("createdAt", order),
+      limit(lim)
+    );
+
+    if (lastLog) {
+      callLogsQuery = query(callLogsQuery, startAfter(lastLog));
+    }
 
     const unsubscribe = onSnapshot(callLogsQuery, (snapshot) => {
       const logs = snapshot.docs.map((doc) => ({
@@ -24,16 +39,26 @@ export const fetchData = () => (dispatch) => {
         ...doc.data(),
       }));
 
-      dispatch({
-        type: "FETCH_CALL_LOGS_SUCCESS",
-        payload: logs,
-      });
+      const lastVisibleDoc = snapshot.docs[snapshot.docs.length - 1];
+      const hasMoreLogs = snapshot.docs.length >= lim;
+
+      if (lastLog) {
+        dispatch({
+          type: "LOAD_MORE_SUCCESS",
+          payload: { logs, lastLog: lastVisibleDoc, hasMoreLogs },
+        });
+      } else {
+        dispatch({
+          type: "FETCH_CALL_LOGS_SUCCESS",
+          payload: { logs, lastLog: lastVisibleDoc, hasMoreLogs },
+        });
+      }
     });
 
     return unsubscribe;
   } catch (error) {
     dispatch({
-      type: "FETCH_CALL_LOGS_ERROR",
+      type: lastLog ? "LOAD_MORE_ERROR" : "FETCH_CALL_LOGS_ERROR",
       error: error.message || "An error occurred while fetching call logs",
     });
   }
