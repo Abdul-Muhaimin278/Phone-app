@@ -1,9 +1,17 @@
-import CallScreen from "../Components/CallScreen";
-import DialPad from "../Components/DialPad";
-import RecentLog from "../Components/RecentLog";
+import { createBrowserRouter } from "react-router-dom";
+import CallScreen from "../pages/CallScreen";
+import DialPad from "../pages/DialPad";
+import RecentLog from "../pages/RecentLog";
+import { PhoneLayout } from "../layout/PhoneLayout";
 
-export const routes = [
-  { path: "/dial", component: <DialPad /> },
-  { path: "/recent", component: <RecentLog /> },
-  { path: "/call", component: <CallScreen /> },
-];
+export const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <PhoneLayout />,
+    children: [
+      { path: "/dial", element: <DialPad /> },
+      { path: "/recent", element: <RecentLog /> },
+    ],
+  },
+  { path: "/call", element: <CallScreen /> },
+]);
