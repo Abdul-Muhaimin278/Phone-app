@@ -120,6 +120,15 @@ button {
   font-size: 2rem;
 }
 
+.dialpad-call:disabled {
+  background-color: #2fd158;
+  cursor: not-allowed;
+}
+
+.dialpad-call:disabled:hover {
+  background-color: #27ab48;
+}
+
 /* styles.css */
 
 .del-icon {

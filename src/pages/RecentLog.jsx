@@ -125,7 +125,7 @@ const RecentLog = () => {
           color="danger"
           className="mx-auto"
           onClick={handleLoadMore}
-          disabled={loadingMore}
+          disabled={loadingMore || loading}
         >
           {loadingMore ? <Spinner size="sm" /> : "Load More"}
         </Button>
