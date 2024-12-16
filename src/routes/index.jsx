@@ -9,6 +9,7 @@ export const routes = createBrowserRouter([
     path: "/",
     element: <PhoneLayout />,
     children: [
+      { index: true, element: <Navigate to="/dial" replace /> },
       { path: "/dial", element: <DialPad /> },
       { path: "/recent", element: <RecentLog /> },
       { path: "*", element: <Navigate to="/dial" replace /> },
