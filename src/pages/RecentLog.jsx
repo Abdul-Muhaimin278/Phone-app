@@ -119,11 +119,10 @@ const RecentLog = () => {
           ))
         )}
       </div>
-
       {hasMoreLogs && (
         <Button
           color="danger"
-          className="mx-auto"
+          className="mx-auto mt-3"
           onClick={handleLoadMore}
           disabled={loadingMore || loading}
         >
